@@ -47,19 +47,23 @@ func (s *sharesStruct) GetSharesByName(name string) (shares []model2.SharesDBMod
 
 	return
 }
+
 func (s *sharesStruct) GetSharesByPath(path string) (shares []model2.SharesDBModel) {
 	s.db.Select("anonymous,path,id").Where("path = ?", path).Find(&shares)
 	return
 }
+
 func (s *sharesStruct) GetSharesList() (shares []model2.SharesDBModel) {
 	s.db.Select("anonymous,path,id").Find(&shares)
 	return
 }
+
 func (s *sharesStruct) CreateShare(share model2.SharesDBModel) {
 	s.db.Create(&share)
 	s.InitSambaConfig()
 	s.UpdateConfigFile()
 }
+
 func (s *sharesStruct) DeleteShare(id string) {
 	s.db.Where("id= ?", id).Delete(&model.SharesDBModel{})
 	s.UpdateConfigFile()
@@ -67,9 +71,9 @@ func (s *sharesStruct) DeleteShare(id string) {
 
 func (s *sharesStruct) UpdateConfigFile() {
 	shares := []model2.SharesDBModel{}
-	s.db.Select("anonymous,path,time_machine").Find(&shares)
-	//generated config file
-	var configStr = ""
+	s.db.Select("anonymous,path").Find(&shares)
+	// generated config file
+	configStr := ""
 	for _, share := range shares {
 		dirName := filepath.Base(share.Path)
 		configStr += `
@@ -84,17 +88,17 @@ create mask = 0777
 directory mask = 0777
 force user = root
 `
-		if share.TimeMachine {
+		if strings.EqualFold(dirName, "timemachine") {
 			configStr += "   fruit:time machine = yes\n"
 		}
 		configStr += "\n"
 	}
-	//write config file
+	// write config file
 	file.WriteToPath([]byte(configStr), "/etc/samba", "smb.casa.conf")
-	//restart samba
+	// restart samba
 	command2.ExecResultStrArray("source " + config.AppInfo.ShellPath + "/helper.sh ;RestartSMBD")
-
 }
+
 func (s *sharesStruct) InitSambaConfig() {
 	if file.Exists("/etc/samba/smb.conf") {
 		str := file.ReadLine(1, "/etc/samba/smb.conf")
@@ -102,7 +106,7 @@ func (s *sharesStruct) InitSambaConfig() {
 			return
 		}
 		file.MoveFile("/etc/samba/smb.conf", "/etc/samba/smb.conf.bak")
-		var smbConf = ""
+		smbConf := ""
 		smbConf += `# Copyright (c) 2021-2022 CasaOS Inc. All rights reserved.
 #
 #
@@ -153,7 +157,6 @@ func (s *sharesStruct) InitSambaConfig() {
    include=/etc/samba/smb.casa.conf`
 		file.WriteToPath([]byte(smbConf), "/etc/samba", "smb.conf")
 	}
-
 }
 
 func NewSharesService(db *gorm.DB) SharesService {
