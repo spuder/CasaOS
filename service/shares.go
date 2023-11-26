@@ -67,7 +67,7 @@ func (s *sharesStruct) DeleteShare(id string) {
 
 func (s *sharesStruct) UpdateConfigFile() {
 	shares := []model2.SharesDBModel{}
-	s.db.Select("anonymous,path").Find(&shares)
+	s.db.Select("anonymous,path,time_machine").Find(&shares)
 	//generated config file
 	var configStr = ""
 	for _, share := range shares {
@@ -83,8 +83,11 @@ guest ok = Yes
 create mask = 0777
 directory mask = 0777
 force user = root
-
 `
+		if share.TimeMachine {
+			configStr += "   fruit:time machine = yes\n"
+		}
+		configStr += "\n"
 	}
 	//write config file
 	file.WriteToPath([]byte(configStr), "/etc/samba", "smb.casa.conf")
