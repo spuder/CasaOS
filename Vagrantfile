@@ -67,12 +67,12 @@ Vagrant.configure("2") do |config|
 
     cd /vagrant_data
     sudo apt-get update -qq
-    sudo apt-get -q --no-install-recommends install sudo git make upx \
+    sudo apt-get -qq -y --no-install-recommends install sudo git make upx \
             gcc libc6-dev-amd64-cross \
             gcc-aarch64-linux-gnu \
             libc6-dev-arm64-cross \
             gcc-arm-linux-gnueabihf \
-            libc6-dev-armhf-cross -y
+            libc6-dev-armhf-cross
 
     # Install Nodejs/NPM
     sudo apt-get install -q -y ca-certificates curl gnupg
