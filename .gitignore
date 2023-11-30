@@ -40,3 +40,7 @@ CasaOS
 
 # System Files
 .DS_Store
+
+
+# Vagrant
+.vagrant
